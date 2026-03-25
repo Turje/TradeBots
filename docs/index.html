@@ -389,9 +389,240 @@ a { color: inherit; text-decoration: none; }
    EMPTY STATE PLACEHOLDERS
 ═══════════════════════════════════════════════════════ */
 .empty { color: var(--text-4); font-size: 11px; text-align: center; padding: 16px 0; }
+
+/* ═══════════════════════════════════════════════════════
+   DEMO BANNER + BUTTON
+═══════════════════════════════════════════════════════ */
+.demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0 12px;
+}
+#demo-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #1e1b4b, #2d1b4e);
+  border: 1.5px solid var(--purple);
+  border-radius: 30px;
+  color: var(--purple-l);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 10px 24px;
+  cursor: pointer;
+  box-shadow: 0 0 22px rgba(124,58,237,0.35);
+  transition: box-shadow 0.3s, transform 0.2s, background 0.2s;
+  animation: btn-pulse 2.5s ease-in-out infinite;
+}
+#demo-btn:hover {
+  background: linear-gradient(135deg, #2e2a6b, #4a1b6e);
+  box-shadow: 0 0 36px rgba(124,58,237,0.6);
+  transform: scale(1.04);
+  animation: none;
+}
+#demo-btn .btn-icon { font-size: 18px; }
+#demo-btn .btn-sub  { font-size: 10px; color: var(--text-3); font-weight: 400; margin-top: 0; }
+@keyframes btn-pulse {
+  0%, 100% { box-shadow: 0 0 22px rgba(124,58,237,0.35); }
+  50%       { box-shadow: 0 0 40px rgba(124,58,237,0.65); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TRANSACTION DEMO MODAL
+═══════════════════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(5,8,16,0.88);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: #0a0e1a;
+  border: 1px solid var(--border-hi);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 820px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 60px rgba(99,102,241,0.25);
+  animation: modal-in 0.3s cubic-bezier(.16,1,.3,1);
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, #0f172a, #0a0e1a);
+  flex-shrink: 0;
+}
+.modal-title {
+  font-size: 15px; font-weight: 800; color: var(--purple-l);
+  letter-spacing: 0.5px;
+}
+.modal-subtitle { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.modal-close {
+  background: none; border: none; color: var(--text-3);
+  font-size: 22px; cursor: pointer; line-height: 1;
+  padding: 4px 8px; border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+}
+.modal-close:hover { color: var(--text); background: var(--border); }
+
+/* Stepper */
+.modal-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  gap: 0;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.step-node {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700;
+  padding: 5px 12px; border-radius: 20px;
+  border: 1px solid var(--border);
+  color: var(--text-3);
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.step-node.done    { border-color: var(--indigo); color: var(--indigo-l); background: rgba(67,56,202,0.1); }
+.step-node.active  { border-color: var(--purple); color: var(--purple-l); background: rgba(124,58,237,0.15); box-shadow: 0 0 12px rgba(124,58,237,0.3); }
+.step-connector { width: 28px; height: 1px; background: var(--border); flex-shrink: 0; transition: background 0.3s; }
+.step-connector.done { background: var(--indigo); }
+
+/* Content */
+.modal-body {
+  padding: 22px 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+.step-content { animation: fade-in 0.35s ease-out; }
+
+.step-stage-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 18px;
+}
+.step-stage-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; border: 2px solid; flex-shrink: 0;
+}
+.step-stage-name { font-size: 18px; font-weight: 800; }
+.step-stage-sub  { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+/* Data rows inside modal */
+.tx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tx-card {
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.tx-card.full { grid-column: 1 / -1; }
+.tx-label { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+.tx-value { font-size: 14px; font-weight: 700; color: var(--text); }
+.tx-value.green  { color: var(--green); }
+.tx-value.blue   { color: var(--blue); }
+.tx-value.purple { color: var(--purple-l); }
+.tx-value.cyan   { color: var(--cyan); }
+.tx-value.amber  { color: var(--amber); }
+.tx-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+.agent-card {
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.agent-vote { min-width: 60px; text-align: center; }
+.agent-name-txt { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.agent-reasoning { font-size: 11px; color: var(--text-3); line-height: 1.5; }
+
+.tx-reasoning {
+  background: #0f172a;
+  border-left: 3px solid var(--purple);
+  border-radius: 0 6px 6px 0;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.6;
+  margin-top: 10px;
+}
+.tx-reasoning .label { color: var(--purple-l); margin-bottom: 4px; display: block; }
+
+/* Progress bar */
+.modal-progress-wrap {
+  padding: 0 24px 16px;
+  flex-shrink: 0;
+}
+.modal-progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--text-3); margin-bottom: 5px;
+}
+.modal-progress-bar {
+  height: 3px; background: var(--border); border-radius: 2px; overflow: hidden;
+}
+.modal-progress-fill {
+  height: 3px; background: linear-gradient(90deg, var(--indigo), var(--purple));
+  border-radius: 2px;
+  transition: width linear;
+}
+
+/* Nav buttons */
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.modal-nav-btn {
+  background: #1e1b4b; border: 1px solid var(--indigo);
+  color: var(--indigo-l); font-size: 12px; font-weight: 600;
+  padding: 8px 18px; border-radius: 8px; cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.modal-nav-btn:hover { background: #2a2780; box-shadow: 0 0 10px rgba(99,102,241,0.3); }
+.modal-nav-btn:disabled { opacity: 0.35; cursor: default; }
+.modal-step-counter { font-size: 12px; color: var(--text-3); }
 </style>
 </head>
 <body>
+
+<!-- ═══════ DEMO BANNER ═══════ -->
+<div class="demo-banner">
+  <button id="demo-btn" onclick="openDemo()">
+    <span class="btn-icon">▶</span>
+    <span>
+      <div>Click here to watch a live transaction</div>
+      <div class="btn-sub">Full step-by-step walkthrough · NVDA · $8,754 trade</div>
+    </span>
+  </button>
+</div>
 
 <!-- ═══════ HEADER ═══════ -->
 <div class="header">
@@ -533,6 +764,54 @@ a { color: inherit; text-decoration: none; }
       <span class="act-stage system">System</span>
       <span class="act-msg">TradeBots initialized — waiting for first scan cycle…</span>
     </div>
+  </div>
+</div>
+
+<!-- ═══════ TRANSACTION DEMO MODAL ═══════ -->
+<div class="modal-overlay" id="demo-modal" onclick="handleOverlayClick(event)">
+  <div class="modal">
+
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">🔄 Live Transaction Walkthrough</div>
+        <div class="modal-subtitle">NVDA — $8,754 paper trade · Full 5-stage pipeline</div>
+      </div>
+      <button class="modal-close" onclick="closeDemo()">✕</button>
+    </div>
+
+    <!-- Stepper -->
+    <div class="modal-stepper">
+      <div class="step-node" id="sn-0">🔍 Scanner</div>
+      <div class="step-connector" id="sc-0"></div>
+      <div class="step-node" id="sn-1">⚡ Strategy</div>
+      <div class="step-connector" id="sc-1"></div>
+      <div class="step-node" id="sn-2">🧠 Orchestrator</div>
+      <div class="step-connector" id="sc-2"></div>
+      <div class="step-node" id="sn-3">💼 Executor</div>
+      <div class="step-connector" id="sc-3"></div>
+      <div class="step-node" id="sn-4">👁️ Watcher</div>
+    </div>
+
+    <!-- Step content -->
+    <div class="modal-body" id="modal-body"></div>
+
+    <!-- Auto-advance progress bar -->
+    <div class="modal-progress-wrap">
+      <div class="modal-progress-label">
+        <span id="prog-label">Auto-advancing…</span>
+        <span id="prog-time"></span>
+      </div>
+      <div class="modal-progress-bar">
+        <div class="modal-progress-fill" id="modal-progress" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="modal-nav-btn" id="btn-prev" onclick="demoNav(-1)" disabled>← Prev</button>
+      <span class="modal-step-counter" id="step-counter">Step 1 of 5</span>
+      <button class="modal-nav-btn" id="btn-next" onclick="demoNav(1)">Next →</button>
+    </div>
+
   </div>
 </div>
 
@@ -1093,6 +1372,380 @@ setInterval(() => {
     updateHeader();
   }
 }, 4000);
+
+// ─────────────────────────────────────────────
+// TRANSACTION DEMO MODAL
+// ─────────────────────────────────────────────
+
+const DEMO_STEPS = [
+  {
+    stage: 'scanner', label: '🔍 Scanner Bot',
+    sub:   'Scanning S&P 500 — cycle #7, 09:14:22 UTC',
+    color: 'var(--sc-text)',
+    iconStyle: 'background:var(--sc-bg);border-color:var(--sc-border)',
+    duration: 5000,
+    render() {
+      return `
+        <div class="step-stage-header">
+          <div class="step-stage-icon" style="${this.iconStyle}">🔍</div>
+          <div>
+            <div class="step-stage-name" style="color:${this.color}">${this.label}</div>
+            <div class="step-stage-sub">${this.sub}</div>
+          </div>
+        </div>
+        <div class="tx-grid">
+          <div class="tx-card">
+            <div class="tx-label">Ticker Identified</div>
+            <div class="tx-value blue" style="font-size:22px">NVDA</div>
+            <div class="tx-sub">NVIDIA Corporation · S&P 500</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Price &amp; Change</div>
+            <div class="tx-value green">$875.40</div>
+            <div class="tx-sub" style="color:var(--green)">▲ +4.2% today</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Volume Ratio</div>
+            <div class="tx-value green">3.1×</div>
+            <div class="tx-sub">vs 20-day average</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">RSI (14)</div>
+            <div class="tx-value blue">62</div>
+            <div class="tx-sub">Momentum zone · not overbought</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">MACD Signal</div>
+            <div class="tx-value green">Bullish crossover ↑</div>
+            <div class="tx-sub">MACD line crossed above signal</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Priority Score</div>
+            <div class="tx-value purple">94 / 100</div>
+            <div class="tx-sub">Ranked #1 of 847 tickers scanned</div>
+          </div>
+          <div class="tx-card full">
+            <div class="tx-label">Scanner Rationale</div>
+            <div style="font-size:12px;color:var(--text-2);line-height:1.6;margin-top:4px">
+              Strong momentum breakout with 3× average volume — likely institutional buying.
+              MACD bullish crossover confirmed. Price trading above SMA20 and SMA50.
+              Selected as top candidate for strategy analysis.
+            </div>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    stage: 'strategy', label: '⚡ Strategy Agents',
+    sub:   '3 agents spawned in parallel · analyzing NVDA',
+    color: 'var(--st-text)',
+    iconStyle: 'background:var(--st-bg);border-color:var(--st-border)',
+    duration: 6000,
+    render() {
+      return `
+        <div class="step-stage-header">
+          <div class="step-stage-icon" style="${this.iconStyle}">⚡</div>
+          <div>
+            <div class="step-stage-name" style="color:${this.color}">${this.label}</div>
+            <div class="step-stage-sub">${this.sub}</div>
+          </div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-vote">
+            <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">VOTE</div>
+            <span class="pill-buy" style="font-size:11px;padding:3px 8px">BUY</span>
+            <div style="margin-top:5px;font-size:13px;font-weight:800;color:var(--green)">0.84</div>
+          </div>
+          <div>
+            <div class="agent-name-txt">TechnicalAgent</div>
+            <div class="agent-reasoning">RSI 62 with MACD bullish crossover confirmed. Price is above both SMA20 ($848) and SMA50 ($821). Bollinger Band width expanding — volatility breakout pattern. Strong technical setup for continuation move.</div>
+          </div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-vote">
+            <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">VOTE</div>
+            <span class="pill-buy" style="font-size:11px;padding:3px 8px">BUY</span>
+            <div style="margin-top:5px;font-size:13px;font-weight:800;color:var(--green)">0.78</div>
+          </div>
+          <div>
+            <div class="agent-name-txt">MomentumAgent</div>
+            <div class="agent-reasoning">Volume at 3.1× the 20-day average — strong institutional buying signal. Price change +4.2% sustained across the session with no significant pullback. Momentum score: 91/100. Positive carry expected in next 24–48h window.</div>
+          </div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-vote">
+            <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">VOTE</div>
+            <span class="pill-hold" style="font-size:11px;padding:3px 8px">HOLD</span>
+            <div style="margin-top:5px;font-size:13px;font-weight:800;color:var(--blue)">0.52</div>
+          </div>
+          <div>
+            <div class="agent-name-txt">MeanReversionAgent</div>
+            <div class="agent-reasoning">RSI approaching the 65 reversion threshold. Price near upper Bollinger Band ($892). After a +4.2% move, mean reversion probability increases. Holding position pending clearer consolidation signal. Low conviction — not blocking.</div>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    stage: 'orch', label: '🧠 MetaOrchestrator',
+    sub:   'Synthesizing 3 votes → final decision',
+    color: 'var(--or-text)',
+    iconStyle: 'background:var(--or-bg);border-color:var(--or-border)',
+    duration: 5000,
+    render() {
+      return `
+        <div class="step-stage-header">
+          <div class="step-stage-icon" style="${this.iconStyle}">🧠</div>
+          <div>
+            <div class="step-stage-name" style="color:${this.color}">${this.label}</div>
+            <div class="step-stage-sub">${this.sub}</div>
+          </div>
+        </div>
+        <div class="tx-grid">
+          <div class="tx-card">
+            <div class="tx-label">Vote Tally</div>
+            <div class="tx-value green">2 × BUY</div>
+            <div class="tx-sub">1 × HOLD (MeanReversion)</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Avg BUY Confidence</div>
+            <div class="tx-value green">0.81</div>
+            <div class="tx-sub">Technical 0.84 · Momentum 0.78</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Dissent Evaluation</div>
+            <div class="tx-value amber">Weak — accepted</div>
+            <div class="tx-sub">MeanReversion HOLD conf 0.52 &lt; threshold 0.6</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Weighting Rule Applied</div>
+            <div class="tx-value purple">Rule 3 — 2/3 BUY</div>
+            <div class="tx-sub">Override approved · confidence scaled to 0.71</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Final Decision</div>
+            <div class="tx-value green" style="font-size:20px">BUY ✓</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Final Confidence</div>
+            <div class="tx-value green" style="font-size:20px">0.71</div>
+            <div class="tx-sub">Above MIN_STRATEGY_CONFIDENCE (0.60)</div>
+          </div>
+        </div>
+        <div class="tx-reasoning">
+          <span class="label">Orchestrator Reasoning</span>
+          2 of 3 agents agree BUY with strong confidence (avg 0.81). MeanReversionAgent dissent is below the blocking threshold (0.52 &lt; 0.60) — concern is noted but does not veto. Technical and Momentum signals align on a breakout with institutional volume. Proceeding with BUY at scaled confidence 0.71.
+        </div>`;
+    }
+  },
+  {
+    stage: 'executor', label: '💼 Executor',
+    sub:   'Placing paper market order via broker',
+    color: 'var(--ex-text)',
+    iconStyle: 'background:var(--ex-bg);border-color:var(--ex-border)',
+    duration: 4500,
+    render() {
+      return `
+        <div class="step-stage-header">
+          <div class="step-stage-icon" style="${this.iconStyle}">💼</div>
+          <div>
+            <div class="step-stage-name" style="color:${this.color}">${this.label}</div>
+            <div class="step-stage-sub">${this.sub}</div>
+          </div>
+        </div>
+        <div class="tx-grid">
+          <div class="tx-card">
+            <div class="tx-label">Order Type</div>
+            <div class="tx-value cyan">Market BUY</div>
+            <div class="tx-sub">Immediate execution · paper broker</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Ticker</div>
+            <div class="tx-value blue" style="font-size:20px">NVDA</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Shares</div>
+            <div class="tx-value" style="font-size:22px">10</div>
+            <div class="tx-sub">Sized to 8.75% of portfolio</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Fill Price</div>
+            <div class="tx-value green">$875.40</div>
+            <div class="tx-sub">Market order — filled immediately</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Total Cost</div>
+            <div class="tx-value" style="font-size:20px">$8,754</div>
+            <div class="tx-sub">Deducted from cash balance</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Status</div>
+            <div class="tx-value green">✓ FILLED</div>
+            <div class="tx-sub">09:14:26 UTC</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Cash Before</div>
+            <div class="tx-value">$100,000</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Cash After</div>
+            <div class="tx-value cyan">$91,246</div>
+            <div class="tx-sub">Position 1 of 5 open</div>
+          </div>
+          <div class="tx-card full">
+            <div class="tx-label">Position Limits Check</div>
+            <div style="display:flex;gap:16px;margin-top:6px;flex-wrap:wrap">
+              <span style="font-size:12px;color:var(--green)">✓ Under max positions (1/5)</span>
+              <span style="font-size:12px;color:var(--green)">✓ Under max position size (8.75% &lt; 10%)</span>
+              <span style="font-size:12px;color:var(--green)">✓ Sufficient cash available</span>
+            </div>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    stage: 'watcher', label: '👁️ Watcher Bot',
+    sub:   'Position opened · continuous monitoring begins',
+    color: 'var(--wa-text)',
+    iconStyle: 'background:var(--wa-bg);border-color:var(--wa-border)',
+    duration: 5000,
+    render() {
+      return `
+        <div class="step-stage-header">
+          <div class="step-stage-icon" style="${this.iconStyle}">👁️</div>
+          <div>
+            <div class="step-stage-name" style="color:${this.color}">${this.label}</div>
+            <div class="step-stage-sub">${this.sub}</div>
+          </div>
+        </div>
+        <div class="tx-grid">
+          <div class="tx-card">
+            <div class="tx-label">Position</div>
+            <div class="tx-value blue" style="font-size:20px">NVDA</div>
+            <div class="tx-sub">10 shares · entry $875.40</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Current Price</div>
+            <div class="tx-value green">$885.20</div>
+            <div class="tx-sub">As of last Watcher check</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Unrealised P&amp;L</div>
+            <div class="tx-value green" style="font-size:18px">+$98.00</div>
+            <div class="tx-sub">+1.12% · held 12 minutes</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Watcher Decision</div>
+            <div class="tx-value" style="color:var(--blue);font-size:18px">HOLD ✓</div>
+            <div class="tx-sub">Within normal bounds</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Stop-Loss Level</div>
+            <div class="tx-value red">$831.63</div>
+            <div class="tx-sub">−5% from entry · auto-sell if hit</div>
+          </div>
+          <div class="tx-card">
+            <div class="tx-label">Take-Profit Level</div>
+            <div class="tx-value green">$1,006.71</div>
+            <div class="tx-sub">+15% from entry · auto-sell if hit</div>
+          </div>
+          <div class="tx-card full">
+            <div class="tx-label">Monitoring Schedule</div>
+            <div style="display:flex;gap:16px;margin-top:6px;flex-wrap:wrap">
+              <span style="font-size:12px;color:var(--text-2)">🔁 Check every 5 minutes</span>
+              <span style="font-size:12px;color:var(--text-2)">⏰ Max hold: 48 hours</span>
+              <span style="font-size:12px;color:var(--amber)">⚡ Immediate action on stop-loss or take-profit</span>
+            </div>
+          </div>
+        </div>
+        <div class="tx-reasoning" style="border-left-color:var(--amber);margin-top:10px">
+          <span class="label" style="color:var(--amber)">Transaction Complete</span>
+          NVDA position is live and being monitored. The full pipeline ran in ~4 seconds: Scanner identified the opportunity, 3 strategy agents voted in parallel, the Orchestrator synthesized the signals, the Executor placed the trade, and the Watcher is now protecting the position with automatic stop-loss and take-profit rules.
+        </div>`;
+    }
+  }
+];
+
+let demoStep      = 0;
+let demoTimer     = null;
+let demoProgress  = null;
+let demoStartTime = 0;
+
+function openDemo() {
+  demoStep = 0;
+  $id('demo-modal').classList.add('open');
+  renderDemoStep();
+}
+function closeDemo() {
+  $id('demo-modal').classList.remove('open');
+  clearTimeout(demoTimer);
+  cancelAnimationFrame(demoProgress);
+}
+function handleOverlayClick(e) {
+  if (e.target === $id('demo-modal')) closeDemo();
+}
+
+function renderDemoStep() {
+  clearTimeout(demoTimer);
+  cancelAnimationFrame(demoProgress);
+
+  const step = DEMO_STEPS[demoStep];
+  const total = DEMO_STEPS.length;
+
+  // stepper
+  DEMO_STEPS.forEach((s, i) => {
+    const node = $id('sn-' + i);
+    node.className = 'step-node' + (i < demoStep ? ' done' : i === demoStep ? ' active' : '');
+    if (i < total - 1) {
+      const conn = $id('sc-' + i);
+      conn.className = 'step-connector' + (i < demoStep ? ' done' : '');
+    }
+  });
+
+  // content
+  $id('modal-body').innerHTML = `<div class="step-content">${step.render()}</div>`;
+
+  // nav
+  $id('btn-prev').disabled = demoStep === 0;
+  $id('btn-next').textContent = demoStep === total - 1 ? 'Close ✕' : 'Next →';
+  $id('step-counter').textContent = `Step ${demoStep + 1} of ${total}`;
+
+  // progress bar animation
+  const duration = step.duration;
+  demoStartTime = performance.now();
+
+  function animateBar(now) {
+    const elapsed = now - demoStartTime;
+    const pct = Math.min(100, (elapsed / duration) * 100);
+    $id('modal-progress').style.width = pct + '%';
+    const remaining = Math.max(0, Math.ceil((duration - elapsed) / 1000));
+    $id('prog-time').textContent = remaining + 's';
+    if (pct < 100) {
+      demoProgress = requestAnimationFrame(animateBar);
+    }
+  }
+  $id('modal-progress').style.width = '0%';
+  $id('prog-label').textContent = demoStep === total - 1 ? 'Transaction complete' : 'Auto-advancing…';
+  demoProgress = requestAnimationFrame(animateBar);
+
+  // auto-advance
+  if (demoStep < total - 1) {
+    demoTimer = setTimeout(() => demoNav(1), duration);
+  } else {
+    $id('prog-label').textContent = 'Transaction complete ✓';
+    $id('prog-time').textContent = '';
+    $id('modal-progress').style.width = '100%';
+  }
+}
+
+function demoNav(dir) {
+  clearTimeout(demoTimer);
+  cancelAnimationFrame(demoProgress);
+  const next = demoStep + dir;
+  if (next >= DEMO_STEPS.length) { closeDemo(); return; }
+  if (next < 0) return;
+  demoStep = next;
+  renderDemoStep();
+}
 
 // ─────────────────────────────────────────────
 // BOOT
