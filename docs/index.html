@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeBots — Live Trading Simulation</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   BASE RESET & TOKENS
+═══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #050810;
+  --surface:    #0a0e1a;
+  --panel:      #0f172a;
+  --panel2:     #111827;
+  --border:     #1e293b;
+  --border-hi:  #1e3a8a;
+
+  --text:       #e2e8f0;
+  --text-2:     #94a3b8;
+  --text-3:     #64748b;
+  --text-4:     #475569;
+
+  --indigo:     #4338ca;
+  --indigo-l:   #818cf8;
+  --purple:     #7c3aed;
+  --purple-l:   #c4b5fd;
+
+  --green:      #34d399;
+  --green-bg:   #14532d;
+  --red:        #f87171;
+  --red-bg:     #7f1d1d;
+  --blue:       #60a5fa;
+  --blue-bg:    #0c2340;
+  --cyan:       #67e8f9;
+  --cyan-bg:    #0a2535;
+  --amber:      #fbbf24;
+  --amber-bg:   #451a03;
+
+  /* stage colors */
+  --sc-border:  #16a34a; --sc-bg: #0a2010; --sc-text: #4ade80;
+  --st-border:  #4338ca; --st-bg: #1e1b4b; --st-text: #818cf8;
+  --or-border:  #7c3aed; --or-bg: #2d1b4e; --or-text: #c4b5fd;
+  --ex-border:  #0891b2; --ex-bg: #0c1f2d; --ex-text: #67e8f9;
+  --wa-border:  #d97706; --wa-bg: #2d1a0e; --wa-text: #fbbf24;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 14px 18px 24px;
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ═══════════════════════════════════════════════════════
+   TYPOGRAPHY
+═══════════════════════════════════════════════════════ */
+.label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.mono  { font-family: 'SF Mono', 'Fira Code', monospace; }
+
+/* ═══════════════════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════════════════ */
+.badge {
+  display: inline-block;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 2px 7px; border-radius: 20px;
+}
+.badge-green  { background: var(--green-bg);  color: var(--green);  }
+.badge-blue   { background: var(--blue-bg);   color: var(--blue);   }
+.badge-purple { background: var(--or-bg);     color: var(--purple-l); }
+.badge-cyan   { background: var(--cyan-bg);   color: var(--cyan);   }
+.badge-amber  { background: var(--amber-bg);  color: var(--amber);  }
+.badge-red    { background: var(--red-bg);    color: var(--red);    }
+
+/* ═══════════════════════════════════════════════════════
+   SIGNAL PILLS
+═══════════════════════════════════════════════════════ */
+.pill-buy  { background: var(--green-bg);  color: var(--green);  font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 700; }
+.pill-hold { background: var(--blue-bg);   color: var(--blue);   font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 700; }
+.pill-pass { background: var(--red-bg);    color: var(--red);    font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 700; }
+.pill-sell { background: #5c0a0a;          color: #ff6b6b;       font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 700; }
+
+/* ═══════════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════════ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, var(--panel), var(--surface));
+  border: 1px solid var(--border-hi);
+  border-radius: 12px;
+  padding: 14px 22px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header-left  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.header-right { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+
+.logo { font-size: 20px; font-weight: 900; letter-spacing: 2px; color: var(--purple-l); }
+.logo span { color: var(--indigo-l); }
+
+.live-badge {
+  background: var(--green-bg);
+  color: var(--green);
+  font-size: 10px; font-weight: 800;
+  padding: 3px 10px; border-radius: 20px;
+  border: 1px solid #166534;
+  letter-spacing: 1px;
+  animation: pulse-live 2s ease-in-out infinite;
+}
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.header-stat { text-align: center; }
+.header-stat-val { font-size: 17px; font-weight: 800; }
+.header-stat-lbl { font-size: 9px; color: var(--text-3); letter-spacing: 0.5px; text-transform: uppercase; margin-top: 1px; }
+
+.clock { color: var(--text-4); font-size: 11px; }
+
+/* ═══════════════════════════════════════════════════════
+   PIPELINE BAR
+═══════════════════════════════════════════════════════ */
+.pipeline-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.p-node {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; min-width: 88px;
+  transition: transform 0.2s;
+}
+.p-node.active { transform: scale(1.06); }
+
+.p-icon {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  border: 2px solid;
+  transition: box-shadow 0.4s, border-color 0.4s;
+}
+.p-icon.scanner  { background: var(--sc-bg); border-color: var(--sc-border); }
+.p-icon.strategy { background: var(--st-bg); border-color: var(--st-border); }
+.p-icon.orch     { background: var(--or-bg); border-color: var(--or-border); }
+.p-icon.executor { background: var(--ex-bg); border-color: var(--ex-border); }
+.p-icon.watcher  { background: var(--wa-bg); border-color: var(--wa-border); }
+
+.p-icon.active.scanner  { box-shadow: 0 0 16px var(--sc-border); border-color: var(--sc-text); }
+.p-icon.active.strategy { box-shadow: 0 0 16px var(--st-border); border-color: var(--indigo-l); }
+.p-icon.active.orch     { box-shadow: 0 0 16px var(--or-border); border-color: var(--purple-l); }
+.p-icon.active.executor { box-shadow: 0 0 16px var(--ex-border); border-color: var(--cyan); }
+.p-icon.active.watcher  { box-shadow: 0 0 16px var(--wa-border); border-color: var(--amber); }
+
+.p-label { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+.p-label.scanner  { color: var(--sc-text); }
+.p-label.strategy { color: var(--st-text); }
+.p-label.orch     { color: var(--or-text); }
+.p-label.executor { color: var(--ex-text); }
+.p-label.watcher  { color: var(--wa-text); }
+
+.p-count { font-size: 11px; color: var(--text-3); min-height: 16px; text-align: center; }
+
+.p-agents { display: flex; gap: 3px; margin-top: 2px; }
+.p-agent-pip {
+  font-size: 8px; background: var(--st-bg);
+  color: var(--indigo-l); border: 1px solid var(--indigo);
+  padding: 1px 4px; border-radius: 3px; font-weight: 600;
+}
+
+.p-arrow {
+  color: var(--indigo);
+  font-size: 22px;
+  padding: 0 2px;
+  margin-bottom: 18px;
+  opacity: 0.5;
+  transition: opacity 0.4s, color 0.4s;
+  font-family: monospace;
+}
+.p-arrow.lit { opacity: 1; color: var(--indigo-l); }
+
+/* ═══════════════════════════════════════════════════════
+   GRID LAYOUTS
+═══════════════════════════════════════════════════════ */
+.grid-3 { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 12px; margin-bottom: 12px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+@media (max-width: 900px) {
+  .grid-3, .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PANEL
+═══════════════════════════════════════════════════════ */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  transition: border-color 0.4s;
+}
+.panel.active-scanner  { border-color: var(--sc-border); }
+.panel.active-strategy { border-color: var(--st-border); }
+.panel.active-orch     { border-color: var(--or-border); }
+.panel.active-executor { border-color: var(--ex-border); }
+.panel.active-watcher  { border-color: var(--wa-border); }
+
+.panel-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; }
+.panel-title.scanner  { color: var(--sc-text); }
+.panel-title.strategy { color: var(--st-text); }
+.panel-title.orch     { color: var(--or-text); }
+.panel-title.executor { color: var(--ex-text); }
+.panel-title.watcher  { color: var(--wa-text); }
+
+/* ═══════════════════════════════════════════════════════
+   SCANNER PANEL
+═══════════════════════════════════════════════════════ */
+.scan-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  margin-bottom: 5px;
+  animation: fade-in 0.4s ease-out;
+}
+.scan-ticker { font-weight: 800; color: var(--blue); font-size: 13px; }
+.scan-pct-pos { color: var(--green); font-weight: 700; font-size: 12px; }
+.scan-pct-neg { color: var(--red);   font-weight: 700; font-size: 12px; }
+.scan-meta { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+.pri-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 4px; width: 80px; }
+.pri-fill { height: 3px; background: linear-gradient(90deg, var(--indigo), var(--purple)); border-radius: 2px; transition: width 0.6s ease; }
+.scan-right { text-align: right; }
+.pri-val { font-size: 10px; color: var(--text-3); }
+
+/* ═══════════════════════════════════════════════════════
+   STRATEGY PANEL
+═══════════════════════════════════════════════════════ */
+.sig-group { margin-bottom: 10px; animation: fade-in 0.4s ease-out; }
+.sig-ticker { font-weight: 800; color: var(--text); font-size: 12px; margin-bottom: 4px; }
+.sig-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 8px;
+  background: var(--surface);
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+.sig-agent { color: var(--text-2); font-size: 10px; }
+.sig-right { display: flex; gap: 6px; align-items: center; }
+.sig-conf  { color: var(--text-3); font-size: 10px; }
+
+/* ═══════════════════════════════════════════════════════
+   ORCHESTRATOR PANEL
+═══════════════════════════════════════════════════════ */
+.orch-row {
+  padding: 8px 10px;
+  background: var(--surface);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  border-left: 3px solid var(--purple);
+  animation: fade-in 0.4s ease-out;
+}
+.orch-row.prefiltered { border-left-color: var(--text-4); opacity: 0.6; }
+.orch-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.orch-ticker { font-weight: 800; color: var(--text); font-size: 13px; }
+.orch-reason { font-size: 10px; color: var(--text-3); line-height: 1.4; }
+
+/* ═══════════════════════════════════════════════════════
+   EXECUTOR PANEL
+═══════════════════════════════════════════════════════ */
+.trade-row {
+  padding: 8px 10px;
+  background: var(--surface);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  border-left: 3px solid var(--cyan);
+  animation: fade-in 0.4s ease-out;
+}
+.trade-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.trade-ticker { font-weight: 800; color: var(--text); font-size: 13px; }
+.trade-meta  { font-size: 10px; color: var(--text-3); }
+.trade-filled  { color: var(--green); font-size: 10px; font-weight: 700; }
+.trade-pending { color: var(--amber); font-size: 10px; font-weight: 700; }
+
+.exec-footer {
+  margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--text-3);
+}
+
+/* ═══════════════════════════════════════════════════════
+   WATCHER PANEL
+═══════════════════════════════════════════════════════ */
+.watch-row {
+  padding: 8px 10px;
+  background: var(--surface);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  border-left: 3px solid var(--amber);
+  transition: border-color 0.3s;
+}
+.watch-row.danger { border-left-color: var(--red); }
+.watch-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.watch-ticker { font-weight: 800; color: var(--text); font-size: 13px; }
+.watch-bottom { display: flex; justify-content: space-between; align-items: center; }
+.watch-meta { font-size: 10px; color: var(--text-3); }
+.pnl-pos { color: var(--green); font-size: 11px; font-weight: 700; }
+.pnl-neg { color: var(--red);   font-size: 11px; font-weight: 700; }
+
+/* ═══════════════════════════════════════════════════════
+   ACTIVITY LOG
+═══════════════════════════════════════════════════════ */
+.activity-panel { margin-bottom: 0; }
+.activity-log {
+  display: flex; flex-direction: column; gap: 3px;
+  max-height: 160px; overflow: hidden;
+}
+.act-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace;
+  padding: 2px 0;
+  animation: slide-in 0.3s ease-out;
+}
+.act-row.new-entry { background: rgba(99,102,241,0.06); border-radius: 3px; padding: 2px 4px; }
+.act-time   { color: var(--text-4); white-space: nowrap; min-width: 60px; }
+.act-stage  { min-width: 90px; font-weight: 700; }
+.act-msg    { color: var(--text-2); }
+.act-stage.scanner  { color: var(--sc-text); }
+.act-stage.strategy { color: var(--st-text); }
+.act-stage.orch     { color: var(--or-text); }
+.act-stage.executor { color: var(--ex-text); }
+.act-stage.watcher  { color: var(--wa-text); }
+.act-stage.system   { color: var(--text-3); }
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════ */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes icon-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+.p-icon.active { animation: icon-pulse 1s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════ */
+.footer {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 10px;
+  color: var(--text-4);
+  letter-spacing: 0.5px;
+}
+.footer a { color: var(--indigo-l); }
+
+/* ═══════════════════════════════════════════════════════
+   EMPTY STATE PLACEHOLDERS
+═══════════════════════════════════════════════════════ */
+.empty { color: var(--text-4); font-size: 11px; text-align: center; padding: 16px 0; }
+</style>
+</head>
+<body>
+
+<!-- ═══════ HEADER ═══════ -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">TRADE<span>BOTS</span></div>
+    <div class="live-badge">● LIVE</div>
+    <div class="clock mono" id="clock">09:00:00 UTC</div>
+  </div>
+  <div class="header-right">
+    <div class="header-stat">
+      <div class="header-stat-val" id="h-portfolio" style="color:var(--green)">$100,000</div>
+      <div class="header-stat-lbl">Portfolio</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-val" id="h-pnl" style="color:var(--text-2)">+0.00%</div>
+      <div class="header-stat-lbl">Total P&L</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-val" id="h-cash" style="color:var(--text)">$100,000</div>
+      <div class="header-stat-lbl">Cash</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-val" id="h-positions" style="color:var(--text)">0 / 5</div>
+      <div class="header-stat-lbl">Positions</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-val" id="h-cycle" style="color:var(--indigo-l)">Cycle #0</div>
+      <div class="header-stat-lbl">Scan Cycle</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PIPELINE BAR ═══════ -->
+<div class="pipeline-bar">
+  <div class="p-node" id="node-scanner">
+    <div class="p-icon scanner" id="icon-scanner">🔍</div>
+    <div class="p-label scanner">Scanner</div>
+    <div class="p-count" id="cnt-scanner">—</div>
+  </div>
+  <div class="p-arrow" id="arr-1">──▶</div>
+  <div class="p-node" id="node-strategy">
+    <div class="p-icon strategy" id="icon-strategy">⚡</div>
+    <div class="p-label strategy">Strategy</div>
+    <div class="p-count" id="cnt-strategy">—</div>
+    <div class="p-agents">
+      <span class="p-agent-pip">Tech</span>
+      <span class="p-agent-pip">Mom</span>
+      <span class="p-agent-pip">MR</span>
+    </div>
+  </div>
+  <div class="p-arrow" id="arr-2">──▶</div>
+  <div class="p-node" id="node-orch">
+    <div class="p-icon orch" id="icon-orch">🧠</div>
+    <div class="p-label orch">Orchestrator</div>
+    <div class="p-count" id="cnt-orch">—</div>
+  </div>
+  <div class="p-arrow" id="arr-3">──▶</div>
+  <div class="p-node" id="node-executor">
+    <div class="p-icon executor" id="icon-executor">💼</div>
+    <div class="p-label executor">Executor</div>
+    <div class="p-count" id="cnt-executor">—</div>
+  </div>
+  <div class="p-arrow" id="arr-4">──▶</div>
+  <div class="p-node" id="node-watcher">
+    <div class="p-icon watcher" id="icon-watcher">👁️</div>
+    <div class="p-label watcher">Watcher</div>
+    <div class="p-count" id="cnt-watcher">—</div>
+  </div>
+</div>
+
+<!-- ═══════ ROW 1: Scanner | Strategy | Orchestrator ═══════ -->
+<div class="grid-3">
+
+  <!-- SCANNER -->
+  <div class="panel" id="panel-scanner">
+    <div class="panel-head">
+      <div class="panel-title scanner">🔍 Scanner Bot</div>
+      <span class="badge badge-green" id="badge-scanner">IDLE</span>
+    </div>
+    <div id="scanner-body"><div class="empty">Waiting for next scan cycle…</div></div>
+  </div>
+
+  <!-- STRATEGY -->
+  <div class="panel" id="panel-strategy">
+    <div class="panel-head">
+      <div class="panel-title strategy">⚡ Strategy Agents</div>
+      <span class="badge badge-blue" id="badge-strategy">3 PARALLEL</span>
+    </div>
+    <div id="strategy-body"><div class="empty">Awaiting scanner output…</div></div>
+  </div>
+
+  <!-- ORCHESTRATOR -->
+  <div class="panel" id="panel-orch">
+    <div class="panel-head">
+      <div class="panel-title orch">🧠 Orchestrator</div>
+      <span class="badge badge-purple" id="badge-orch">WAITING</span>
+    </div>
+    <div id="orch-body"><div class="empty">Awaiting agent signals…</div></div>
+  </div>
+
+</div>
+
+<!-- ═══════ ROW 2: Executor | Watcher ═══════ -->
+<div class="grid-2">
+
+  <!-- EXECUTOR -->
+  <div class="panel" id="panel-executor">
+    <div class="panel-head">
+      <div class="panel-title executor">💼 Executor</div>
+      <span class="badge badge-cyan" id="badge-executor">PAPER MODE</span>
+    </div>
+    <div id="executor-body"><div class="empty">No trades executed yet.</div></div>
+    <div class="exec-footer">
+      <span>Cash: <strong id="exec-cash" style="color:var(--text)">$100,000</strong></span>
+      <span>Positions: <strong id="exec-pos" style="color:var(--text)">0 / 5</strong></span>
+    </div>
+  </div>
+
+  <!-- WATCHER -->
+  <div class="panel" id="panel-watcher">
+    <div class="panel-head">
+      <div class="panel-title watcher">👁️ Watcher Bot</div>
+      <span class="badge badge-amber" id="badge-watcher">MONITORING</span>
+    </div>
+    <div id="watcher-body"><div class="empty">No open positions to monitor.</div></div>
+  </div>
+
+</div>
+
+<!-- ═══════ ACTIVITY LOG ═══════ -->
+<div class="panel activity-panel">
+  <div class="panel-head">
+    <div class="panel-title" style="color:var(--text-2)">📋 Activity Log</div>
+    <span class="mono" style="color:var(--text-4);font-size:10px">last 10 events</span>
+  </div>
+  <div class="activity-log" id="activity-log">
+    <div class="act-row">
+      <span class="act-time mono">—</span>
+      <span class="act-stage system">System</span>
+      <span class="act-msg">TradeBots initialized — waiting for first scan cycle…</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ FOOTER ═══════ -->
+<div class="footer">
+  TradeBots · Multi-Agent Paper Trading System · 5-Stage Pipeline ·
+  <a href="https://github.com/Turje/TradeBots" target="_blank">GitHub</a>
+  · All data is simulated for demonstration purposes
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT SIMULATION ENGINE
+═══════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const TIMING = {
+  SCAN:  3200,   // scanning phase
+  STRAT: 4000,   // strategy agents phase
+  ORCH:  2200,   // orchestrator phase
+  EXEC:  2000,   // executor phase
+  IDLE:  9000,   // idle between cycles
+};
+
+const BASE_PRICES = {
+  NVDA: 875, AAPL: 190, MSFT: 415, TSLA: 250, META: 520,
+  GOOGL: 175, AMZN: 195, AMD: 175, NFLX: 620,
+  ORCL: 145, JPM: 240, V: 285
+};
+const ALL_TICKERS = Object.keys(BASE_PRICES);
+const MAX_POSITIONS = 5;
+const STOP_LOSS   = -0.05;  // -5%
+const TAKE_PROFIT =  0.15;  // +15%
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let S = {
+  cycle:     0,
+  startCash: 100000,
+  cash:      100000,
+  positions: [],   // {ticker, qty, avgCost, openTime}
+  trades:    [],   // {ticker, qty, price, cost, status, time, side}
+  activities:[],
+};
+
+// ─────────────────────────────────────────────
+// UTILITIES
+// ─────────────────────────────────────────────
+function rand(a, b)     { return Math.random() * (b - a) + a; }
+function randInt(a, b)  { return Math.floor(rand(a, b + 1)); }
+function pick(arr)      { return arr[Math.floor(Math.random() * arr.length)]; }
+function shuffle(arr)   { return [...arr].sort(() => Math.random() - 0.5); }
+function fmt$(n)        { return '$' + n.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}); }
+function fmt$2(n)       { return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtPct(n)      { return (n >= 0 ? '+' : '') + n.toFixed(2) + '%'; }
+function nowUTC() {
+  return new Date().toISOString().slice(11, 19) + ' UTC';
+}
+function nowShort() {
+  return new Date().toISOString().slice(11, 19);
+}
+
+// ─────────────────────────────────────────────
+// LIVE CLOCK
+// ─────────────────────────────────────────────
+setInterval(() => {
+  document.getElementById('clock').textContent = nowUTC();
+}, 1000);
+
+// ─────────────────────────────────────────────
+// MOCK DATA GENERATORS
+// ─────────────────────────────────────────────
+function genCandidate(ticker) {
+  const base  = BASE_PRICES[ticker];
+  const price = +(base * (1 + rand(-0.04, 0.04))).toFixed(2);
+  const changePct    = +(rand(0.4, 6.5) * (Math.random() > 0.12 ? 1 : -0.5)).toFixed(2);
+  const volumeRatio  = +(rand(1.4, 4.8)).toFixed(1);
+  const rsi          = +(rand(42, 76)).toFixed(0);
+  const macdBull     = Math.random() > 0.35;
+  const priority     = Math.min(99, Math.round(volumeRatio * 14 + Math.abs(changePct) * 8 + rand(-6, 6)));
+  return { ticker, price, changePct, volumeRatio, rsi, macdBull, priority };
+}
+
+function genSignal(cand, agentName) {
+  const { rsi, volumeRatio, changePct, macdBull } = cand;
+  let action, confidence;
+
+  if (agentName === 'TechnicalAgent') {
+    if (rsi > 54 && macdBull && changePct > 1.0) {
+      action     = Math.random() > 0.12 ? 'BUY' : 'HOLD';
+      confidence = rand(0.63, 0.90);
+    } else if (rsi < 40) {
+      action     = Math.random() > 0.35 ? 'PASS' : 'HOLD';
+      confidence = rand(0.18, 0.42);
+    } else {
+      const r = Math.random();
+      action     = r < 0.45 ? 'BUY' : r < 0.75 ? 'HOLD' : 'PASS';
+      confidence = rand(0.38, 0.63);
+    }
+
+  } else if (agentName === 'MomentumAgent') {
+    if (volumeRatio > 2.4 && changePct > 1.8) {
+      action     = Math.random() > 0.10 ? 'BUY' : 'HOLD';
+      confidence = rand(0.66, 0.89);
+    } else if (volumeRatio < 1.7) {
+      action     = Math.random() > 0.38 ? 'PASS' : 'HOLD';
+      confidence = rand(0.14, 0.38);
+    } else {
+      const r = Math.random();
+      action     = r < 0.55 ? 'BUY' : r < 0.80 ? 'HOLD' : 'PASS';
+      confidence = rand(0.44, 0.70);
+    }
+
+  } else { // MeanReversionAgent
+    if (rsi < 36 || rsi > 68) {
+      action     = Math.random() > 0.38 ? 'BUY' : 'HOLD';
+      confidence = rand(0.56, 0.81);
+    } else if (rsi > 62 && changePct > 3.5) {
+      action     = Math.random() > 0.42 ? 'PASS' : 'HOLD';
+      confidence = rand(0.28, 0.52);
+    } else {
+      const r = Math.random();
+      action     = r < 0.35 ? 'BUY' : r < 0.65 ? 'HOLD' : 'PASS';
+      confidence = rand(0.33, 0.62);
+    }
+  }
+
+  return { agent: agentName, action, confidence: +confidence.toFixed(2) };
+}
+
+function orchestrate(ticker, signals) {
+  const passCount  = signals.filter(s => s.action === 'PASS').length;
+  if (passCount >= 2) {
+    return {
+      ticker, action: 'HOLD', confidence: 0,
+      reason:      `${passCount} agents returned PASS — pre-filtered`,
+      prefiltered: true,
+    };
+  }
+  const buys    = signals.filter(s => s.action === 'BUY');
+  const avgConf = buys.length
+    ? buys.reduce((a, b) => a + b.confidence, 0) / buys.length
+    : 0;
+
+  if (buys.length === 3 && avgConf > 0.62) {
+    return {
+      ticker, action: 'BUY',
+      confidence:  +(avgConf * 0.96).toFixed(2),
+      reason:      `3/3 agents agree BUY — strong consensus (avg ${avgConf.toFixed(2)})`,
+      prefiltered: false,
+    };
+  }
+  if (buys.length >= 2 && avgConf > 0.54) {
+    const dissent = signals.find(s => s.action !== 'BUY');
+    const dStr    = dissent
+      ? `${dissent.agent.replace('Agent','')} ${dissent.action} (${dissent.confidence})`
+      : '';
+    return {
+      ticker, action: 'BUY',
+      confidence:  +(avgConf * 0.87).toFixed(2),
+      reason:      `2/3 agree BUY${dStr ? ` · ${dStr} — dissent accepted` : ''}`,
+      prefiltered: false,
+    };
+  }
+  return {
+    ticker, action: 'HOLD',
+    confidence:  +(avgConf * 0.45).toFixed(2),
+    reason:      `Insufficient consensus (${buys.length}/3 BUY) — no trade`,
+    prefiltered: false,
+  };
+}
+
+// ─────────────────────────────────────────────
+// PORTFOLIO HELPERS
+// ─────────────────────────────────────────────
+function currentPrice(ticker) {
+  return +(BASE_PRICES[ticker] * (1 + rand(-0.03, 0.05))).toFixed(2);
+}
+
+function portfolioValue() {
+  const posVal = S.positions.reduce((sum, p) => {
+    return sum + p.qty * currentPrice(p.ticker);
+  }, 0);
+  return S.cash + posVal;
+}
+
+function pnlPct() {
+  return ((portfolioValue() - S.startCash) / S.startCash) * 100;
+}
+
+// ─────────────────────────────────────────────
+// DOM HELPERS
+// ─────────────────────────────────────────────
+function $id(id) { return document.getElementById(id); }
+
+function setActive(stage) {
+  ['scanner','strategy','orch','executor','watcher'].forEach(s => {
+    const icon  = $id('icon-' + s);
+    const node  = $id('node-' + s);
+    const panel = $id('panel-' + s);
+    icon.classList.toggle('active', s === stage);
+    node.classList.toggle('active', s === stage);
+    // panel border
+    panel.className = 'panel' + (s === stage ? ` active-${s}` : '');
+  });
+  // arrows
+  const arrowMap = { scanner:1, strategy:2, orch:3, executor:4 };
+  [1,2,3,4].forEach(i => {
+    $id('arr-' + i).classList.toggle('lit', arrowMap[stage] >= i);
+  });
+}
+
+function clearActive() {
+  ['scanner','strategy','orch','executor','watcher'].forEach(s => {
+    $id('icon-' + s).classList.remove('active');
+    $id('node-' + s).classList.remove('active');
+    $id('panel-' + s).className = 'panel';
+  });
+  [1,2,3,4].forEach(i => $id('arr-' + i).classList.remove('lit'));
+}
+
+function addActivity(stageName, stageClass, msg) {
+  const entry = { time: nowShort(), stage: stageName, stageClass, msg };
+  S.activities.unshift(entry);
+  if (S.activities.length > 10) S.activities.pop();
+  renderActivityLog();
+}
+
+function renderActivityLog() {
+  const log = $id('activity-log');
+  log.innerHTML = S.activities.map((a, i) => `
+    <div class="act-row${i === 0 ? ' new-entry' : ''}">
+      <span class="act-time mono">${a.time}</span>
+      <span class="act-stage ${a.stageClass}">${a.stage}</span>
+      <span class="act-msg">${a.msg}</span>
+    </div>`).join('');
+}
+
+function updateHeader() {
+  const val  = portfolioValue();
+  const pnl  = pnlPct();
+  const pos  = S.positions.length;
+  $id('h-portfolio').textContent  = fmt$(val);
+  $id('h-portfolio').style.color  = val >= S.startCash ? 'var(--green)' : 'var(--red)';
+  $id('h-pnl').textContent        = fmtPct(pnl);
+  $id('h-pnl').style.color        = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  $id('h-cash').textContent       = fmt$(S.cash);
+  $id('h-positions').textContent  = `${pos} / ${MAX_POSITIONS}`;
+  $id('h-cycle').textContent      = `Cycle #${S.cycle}`;
+  $id('exec-cash').textContent    = fmt$(S.cash);
+  $id('exec-pos').textContent     = `${pos} / ${MAX_POSITIONS}`;
+}
+
+// ─────────────────────────────────────────────
+// RENDER: SCANNER
+// ─────────────────────────────────────────────
+function renderScanner(candidates) {
+  $id('cnt-scanner').textContent = `${candidates.length} candidates`;
+  $id('badge-scanner').textContent = 'SCANNING';
+
+  const sorted = [...candidates].sort((a, b) => b.priority - a.priority);
+  $id('scanner-body').innerHTML = sorted.map(c => `
+    <div class="scan-row">
+      <div>
+        <div>
+          <span class="scan-ticker">${c.ticker}</span>&nbsp;&nbsp;
+          <span class="${c.changePct >= 0 ? 'scan-pct-pos' : 'scan-pct-neg'}">${c.changePct >= 0 ? '▲' : '▼'} ${Math.abs(c.changePct)}%</span>
+        </div>
+        <div class="scan-meta">vol ${c.volumeRatio}x · RSI ${c.rsi} · MACD ${c.macdBull ? '↑' : '→'}</div>
+        <div class="pri-bar"><div class="pri-fill" style="width:${c.priority}%"></div></div>
+      </div>
+      <div class="scan-right">
+        <div style="color:var(--text-2);font-size:12px;font-weight:700">${fmt$2(c.price)}</div>
+        <div class="pri-val">p:${c.priority}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// RENDER: STRATEGY
+// ─────────────────────────────────────────────
+function renderStrategy(signalsMap) {
+  $id('cnt-strategy').textContent = `${Object.keys(signalsMap).length} analyzed`;
+  $id('badge-strategy').textContent = 'RUNNING';
+
+  const pillFor = a => {
+    if (a === 'BUY')  return '<span class="pill-buy">BUY</span>';
+    if (a === 'HOLD') return '<span class="pill-hold">HOLD</span>';
+    return '<span class="pill-pass">PASS</span>';
+  };
+
+  $id('strategy-body').innerHTML = Object.entries(signalsMap).map(([ticker, sigs]) => `
+    <div class="sig-group">
+      <div class="sig-ticker">${ticker}</div>
+      <div>
+        ${sigs.map(s => `
+          <div class="sig-row">
+            <span class="sig-agent">${s.agent}</span>
+            <div class="sig-right">
+              ${pillFor(s.action)}
+              <span class="sig-conf">${s.confidence}</span>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// RENDER: ORCHESTRATOR
+// ─────────────────────────────────────────────
+function renderOrch(decisions) {
+  const buys = decisions.filter(d => d.action === 'BUY');
+  $id('cnt-orch').textContent = `${buys.length} BUY decision${buys.length !== 1 ? 's' : ''}`;
+  $id('badge-orch').textContent = `${decisions.length} PROCESSED`;
+
+  const pillFor = (d) => {
+    if (d.prefiltered) return '<span class="pill-pass">FILTERED</span>';
+    if (d.action === 'BUY')  return `<span class="pill-buy">BUY · ${d.confidence}</span>`;
+    return '<span class="pill-hold">HOLD</span>';
+  };
+
+  $id('orch-body').innerHTML = decisions.map(d => `
+    <div class="orch-row${d.prefiltered ? ' prefiltered' : ''}">
+      <div class="orch-top">
+        <span class="orch-ticker">${d.ticker}</span>
+        ${pillFor(d)}
+      </div>
+      <div class="orch-reason">${d.reason}</div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// RENDER: EXECUTOR
+// ─────────────────────────────────────────────
+function renderExecutor() {
+  $id('cnt-executor').textContent = `${S.trades.length} trade${S.trades.length !== 1 ? 's' : ''}`;
+  if (S.trades.length === 0) {
+    $id('executor-body').innerHTML = '<div class="empty">No trades executed yet.</div>';
+    return;
+  }
+  const recent = S.trades.slice(-4).reverse();
+  $id('executor-body').innerHTML = recent.map(t => `
+    <div class="trade-row">
+      <div class="trade-top">
+        <span class="trade-ticker">${t.side === 'buy' ? 'BUY' : 'SELL'} ${t.ticker}</span>
+        <span class="${t.status === 'FILLED' ? 'trade-filled' : 'trade-pending'}">${t.status === 'FILLED' ? '✓ FILLED' : '⏳ PENDING'}</span>
+      </div>
+      <div class="trade-meta">${t.qty} sh @ ${fmt$2(t.price)} · cost ${fmt$(t.cost)} · ${t.time}</div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// RENDER: WATCHER
+// ─────────────────────────────────────────────
+function renderWatcher() {
+  $id('cnt-watcher').textContent = `${S.positions.length} monitored`;
+  if (S.positions.length === 0) {
+    $id('watcher-body').innerHTML = '<div class="empty">No open positions to monitor.</div>';
+    return;
+  }
+  $id('watcher-body').innerHTML = S.positions.map(p => {
+    const cur    = currentPrice(p.ticker);
+    const pnlP   = ((cur - p.avgCost) / p.avgCost) * 100;
+    const pnl$   = (cur - p.avgCost) * p.qty;
+    const danger = pnlP < -2.5 || pnlP > 10;
+    const status = pnlP <= STOP_LOSS * 100 ? 'SELL'
+                 : pnlP >= TAKE_PROFIT * 100 ? 'SELL'
+                 : pnlP < -2   ? 'REASSESS'
+                 : 'HOLD';
+    const pill   = status === 'SELL'
+      ? '<span class="pill-sell">SELL</span>'
+      : status === 'REASSESS'
+        ? '<span class="pill-hold">REASSESS</span>'
+        : '<span class="badge badge-green" style="font-size:9px">HOLD</span>';
+
+    const stopPx = (p.avgCost * (1 + STOP_LOSS)).toFixed(2);
+    const holdH  = Math.round((Date.now() - p.openTime) / 3600000 * 10) / 10;
+
+    return `
+      <div class="watch-row${danger ? ' danger' : ''}">
+        <div class="watch-top">
+          <span class="watch-ticker">${p.ticker}</span>
+          ${pill}
+        </div>
+        <div class="watch-bottom">
+          <span class="watch-meta">${fmtPct(pnlP)} · held ${holdH}h · stop $${stopPx}</span>
+          <span class="${pnl$ >= 0 ? 'pnl-pos' : 'pnl-neg'}">${pnl$ >= 0 ? '+' : ''}${fmt$(pnl$)}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+// WATCHER AUTO-CLOSE LOGIC
+// ─────────────────────────────────────────────
+function runWatcherCheck() {
+  const toClose = [];
+  S.positions.forEach(p => {
+    const cur  = currentPrice(p.ticker);
+    const pnlP = (cur - p.avgCost) / p.avgCost;
+    if (pnlP <= STOP_LOSS) {
+      toClose.push({ pos: p, cur, reason: `stop-loss triggered (${fmtPct(pnlP * 100)})` });
+    } else if (pnlP >= TAKE_PROFIT) {
+      toClose.push({ pos: p, cur, reason: `take-profit triggered (${fmtPct(pnlP * 100)})` });
+    }
+  });
+
+  toClose.forEach(({ pos, cur, reason }) => {
+    const idx = S.positions.findIndex(p => p.ticker === pos.ticker);
+    if (idx === -1) return;
+    S.positions.splice(idx, 1);
+    const proceeds = pos.qty * cur;
+    S.cash += proceeds;
+    S.trades.push({ ticker: pos.ticker, qty: pos.qty, price: cur, cost: proceeds, status: 'FILLED', time: nowShort(), side: 'sell' });
+    addActivity('Watcher', 'watcher', `SELL ${pos.ticker} · ${reason} · proceeds ${fmt$(proceeds)}`);
+  });
+
+  // occasional benign check
+  if (toClose.length === 0 && S.positions.length > 0 && Math.random() > 0.7) {
+    const p = pick(S.positions);
+    const cur  = currentPrice(p.ticker);
+    const pnlP = ((cur - p.avgCost) / p.avgCost) * 100;
+    addActivity('Watcher', 'watcher', `${p.ticker} within bounds — ${fmtPct(pnlP)} · continuing to hold`);
+  }
+
+  renderWatcher();
+  updateHeader();
+}
+
+// ─────────────────────────────────────────────
+// MAIN SIMULATION LOOP
+// ─────────────────────────────────────────────
+async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function runCycle() {
+  S.cycle++;
+  updateHeader();
+
+  // ── PHASE 1: SCANNER ──────────────────────
+  setActive('scanner');
+  $id('badge-scanner').textContent = 'SCANNING';
+  addActivity('Scanner', 'scanner', `Cycle #${S.cycle} started — scanning S&P 500 (847 tickers)`);
+
+  const numCandidates = randInt(3, 6);
+  const chosen        = shuffle(ALL_TICKERS).slice(0, numCandidates);
+  const candidates    = chosen.map(genCandidate);
+  renderScanner(candidates);
+  addActivity('Scanner', 'scanner', `Scan complete: ${ALL_TICKERS.length} tickers → ${candidates.length} candidates surfaced`);
+  $id('badge-scanner').textContent = `${candidates.length} FOUND`;
+  await sleep(TIMING.SCAN);
+
+  // ── PHASE 2: STRATEGY ─────────────────────
+  setActive('strategy');
+  $id('badge-strategy').textContent = 'RUNNING';
+  addActivity('Strategy', 'strategy', `Spawning 3 agents in parallel — analyzing ${candidates.length} candidates`);
+
+  const signalsMap = {};
+  const agents = ['TechnicalAgent', 'MomentumAgent', 'MeanReversionAgent'];
+  candidates.forEach(c => {
+    signalsMap[c.ticker] = agents.map(a => genSignal(c, a));
+  });
+  renderStrategy(signalsMap);
+
+  await sleep(TIMING.STRAT / 2);
+  addActivity('Strategy', 'strategy', `All 3 agents finished parallel analysis (${candidates.length} tickers)`);
+  $id('badge-strategy').textContent = `${candidates.length * 3} SIGNALS`;
+  await sleep(TIMING.STRAT / 2);
+
+  // ── PHASE 3: ORCHESTRATOR ─────────────────
+  setActive('orch');
+  $id('badge-orch').textContent = 'SYNTHESIZING';
+  addActivity('Orchestrator', 'orch', `Received ${Object.keys(signalsMap).length * 3} signals — applying weighting rules`);
+
+  const decisions = candidates.map(c => orchestrate(c.ticker, signalsMap[c.ticker]));
+  renderOrch(decisions);
+
+  const buyDecisions = decisions.filter(d => d.action === 'BUY');
+  const filtered     = decisions.filter(d => d.prefiltered);
+  decisions.forEach(d => {
+    if (d.prefiltered) {
+      addActivity('Orchestrator', 'orch', `${d.ticker}: ${d.reason}`);
+    } else if (d.action === 'BUY') {
+      addActivity('Orchestrator', 'orch', `${d.ticker}: ${d.reason} → BUY ${d.confidence}`);
+    }
+  });
+
+  $id('badge-orch').textContent = `${buyDecisions.length} BUY`;
+  await sleep(TIMING.ORCH);
+
+  // ── PHASE 4: EXECUTOR ─────────────────────
+  setActive('executor');
+  $id('badge-executor').textContent = 'TRADING';
+  addActivity('Executor', 'executor', `Processing ${buyDecisions.length} BUY decision${buyDecisions.length !== 1 ? 's' : ''}`);
+
+  buyDecisions.forEach(d => {
+    if (S.positions.length >= MAX_POSITIONS) {
+      addActivity('Executor', 'executor', `${d.ticker}: skipped — max positions reached (${MAX_POSITIONS})`);
+      return;
+    }
+    const already = S.positions.find(p => p.ticker === d.ticker);
+    if (already) {
+      addActivity('Executor', 'executor', `${d.ticker}: already in portfolio — skipping duplicate`);
+      return;
+    }
+    const price = currentPrice(d.ticker);
+    // size: 5–10% of portfolio, max 10 shares
+    const portVal = portfolioValue();
+    const alloc   = Math.min(S.cash * 0.08, portVal * 0.10);
+    const qty     = Math.max(1, Math.floor(alloc / price));
+    const cost    = +(qty * price).toFixed(2);
+
+    if (cost > S.cash) {
+      addActivity('Executor', 'executor', `${d.ticker}: insufficient cash (need ${fmt$(cost)}, have ${fmt$(S.cash)})`);
+      return;
+    }
+    S.cash -= cost;
+    S.positions.push({ ticker: d.ticker, qty, avgCost: price, openTime: Date.now() });
+    S.trades.push({ ticker: d.ticker, qty, price, cost, status: 'FILLED', time: nowShort(), side: 'buy' });
+    addActivity('Executor', 'executor', `BUY ${d.ticker}: ${qty} sh @ ${fmt$2(price)} · cost ${fmt$(cost)} ✓ FILLED`);
+  });
+
+  renderExecutor();
+  renderWatcher();
+  updateHeader();
+  $id('badge-executor').textContent = 'PAPER MODE';
+  await sleep(TIMING.EXEC);
+
+  // ── PHASE 5: IDLE / WATCHER ───────────────
+  clearActive();
+  $id('icon-watcher').classList.add('active');
+  $id('node-watcher').classList.add('active');
+  $id('badge-scanner').textContent  = 'IDLE';
+  $id('badge-strategy').textContent = '3 PARALLEL';
+  $id('badge-orch').textContent     = 'WAITING';
+
+  addActivity('Watcher', 'watcher', `Portfolio check — monitoring ${S.positions.length} open position${S.positions.length !== 1 ? 's' : ''}`);
+  runWatcherCheck();
+
+  await sleep(TIMING.IDLE / 2);
+  if (S.positions.length > 0) runWatcherCheck();
+  await sleep(TIMING.IDLE / 2);
+
+  $id('icon-watcher').classList.remove('active');
+  $id('node-watcher').classList.remove('active');
+  updateHeader();
+}
+
+// ─────────────────────────────────────────────
+// PORTFOLIO DRIFT (subtle noise between cycles)
+// ─────────────────────────────────────────────
+setInterval(() => {
+  if (S.positions.length > 0) {
+    renderWatcher();
+    updateHeader();
+  }
+}, 4000);
+
+// ─────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────
+(async function boot() {
+  updateHeader();
+  addActivity('System', 'system', `TradeBots initialized · paper capital ${fmt$(S.startCash)} · first scan in 2s`);
+  await sleep(2000);
+
+  while (true) {
+    try {
+      await runCycle();
+    } catch(e) {
+      console.error('Cycle error:', e);
+      await sleep(3000);
+    }
+  }
+})();
+</script>
+</body>
+</html>

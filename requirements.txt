@@ -1,0 +1,10 @@
+anthropic
+yfinance
+ccxt
+alpaca-py
+apscheduler
+pandas
+ta
+python-dotenv
+pytest
+pytest-mock
